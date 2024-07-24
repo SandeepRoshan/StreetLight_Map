@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Streetlight Fault Reporting</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f0f0f0;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            width: 300px;
+        }
+        h2 {
+            margin-top: 0;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+        }
+        input, textarea {
+            width: 100%;
+            padding: 8px;
+            box-sizing: border-box;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        button {
+            background-color: #28a745;
+            color: white;
+            padding: 10px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #218838;
+        }
+        .error {
+            color: red;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Report Streetlight Fault</h2>
+        <div id="error" class="error"></div>
+        <form id="faultForm">
+            <div class="form-group">
+                <label for="name">Name:</label>
+                <input type="text" id="name" name="name" required>
+            </div>
+            <div class="form-group">
+                <label for="email">Email:</label>
+                <input type="email" id="email" name="email" required>
+            </div>
+            <div class="form-group">
+                <label for="location">Location:</label>
+                <input type="text" id="location" name="location" required>
+            </div>
+            <div class="form-group">
+                <label for="description">Fault Description:</label>
+                <textarea id="description" name="description" rows="4" required></textarea>
+            </div>
+            <button type="submit">Submit</button>
+        </form>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+    <script>
+        (function(){
+            emailjs.init({
+              publicKey: "gWbh9RWevQKTBE4xZ",
+            });
+         })();
+
+        document.getElementById('faultForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            var errorDiv = document.getElementById('error');
+            errorDiv.textContent = '';
+
+            var name = document.getElementById('name').value;
+            var email = document.getElementById('email').value;
+            var location = document.getElementById('location').value;
+            var description = document.getElementById('description').value;
+
+            if (name && email && location && description) {
+                emailjs.send("service_weqwv7g", "template_6jkuo6v", { // Replace with your EmailJS service ID and template ID
+                    from_name: name,
+                    from_email: email,
+                    location: location,
+                    description: description
+                }).then(
+                    function(response) {
+                        alert('Fault reported successfully.');
+                        document.getElementById('faultForm').reset();
+                    },
+                    function(error) {
+                        errorDiv.textContent = 'Error sending email: ' + JSON.stringify(error);
+                    }
+                );
+            } else {
+                errorDiv.textContent = 'Please fill out all fields.';
+            }
+        });
+    </script>
+</body>
+</html>

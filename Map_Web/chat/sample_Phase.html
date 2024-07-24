@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Leaflet Map with Custom Icons and Circles</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <style>
+        #map { position: absolute; top: 0; bottom: 0; left: 0; right: 0; }
+        .controls {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            z-index: 1000;
+            background: white;
+            padding: 10px;
+            border-radius: 5px;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+        }
+        .controls button {
+            margin: 5px;
+        }
+        .toggle-box {
+            position: absolute;
+            top: 100px;
+            right: 10px;
+            z-index: 1000;
+            background: white;
+            padding: 10px;
+            border-radius: 5px;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+            display: none;
+        }
+        .toggle-box button {
+            margin: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="controls">
+        <button id="showFirstGroup">Show Area A, B, C</button>
+        <button id="showSecondGroup">Show Area D, E, F</button>
+    </div>
+    <div class="toggle-box" id="toggleBox">
+        <button id="toggleButton" style="background-color: red;">Unsolved</button>
+    </div>
+    <div id="map"></div>
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet-geometryutil/dist/leaflet.geometryutil.js"></script>
+    <script>
+        // Initialize the map and set its view to Chennai's coordinates
+        var map = L.map('map').setView([12.9500, 80.1500], 13);
+
+        // Add a tile layer to the map (OpenStreetMap in this case)
+        L.tileLayer('https://api.maptiler.com/maps/streets-v2/{z}/{x}/{y}.png?key=eJ6g0ISy7nLitnuQAylc', {
+            attribution: '<a href="https://www.maptiler.com/copyright/" target="_blank">&copy; MapTiler</a> <a href="https://www.openstreetmap.org/copyright" target="_blank">&copy; OpenStreetMap contributors</a>'
+        }).addTo(map);
+
+        // Define the areas with their center points and radius
+        var areas = {
+            A: {center: [13.0827, 80.2707], radius: 500},
+            B: {center: [13.0900, 80.2700], radius: 500},
+            C: {center: [13.0800, 80.2800], radius: 500},
+            D: {center: [12.9500, 80.1500], radius: 500},
+            E: {center: [12.9573, 80.1500], radius: 500},
+            F: {center: [12.9473, 80.1600], radius: 500}
+        };
+
+        // Function to add circles for an area
+        function addAreaCircles(area, color, label) {
+            return L.circle(area.center, {radius: area.radius, color: color, fillOpacity: 0.1}).bindPopup(label);
+        }
+
+        // Add circles to differentiate the original and new areas
+        var areaCircles = {
+            A: addAreaCircles(areas.A, 'red', 'Area A').addTo(map),
+            B: addAreaCircles(areas.B, 'blue', 'Area B').addTo(map),
+            C: addAreaCircles(areas.C, 'green', 'Area C').addTo(map),
+            D: addAreaCircles(areas.D, 'purple', 'Area D').addTo(map),
+            E: addAreaCircles(areas.E, 'orange', 'Area E').addTo(map),
+            F: addAreaCircles(areas.F, 'cyan', 'Area F').addTo(map)
+        };
+
+        // Define a custom icon for the streetlight
+        var streetlightIcon = L.icon({
+            iconUrl: 'data:image/png;base64,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', // Replace with the URL to your streetlight icon
+            iconSize: [32, 32], // Size of the icon
+            iconAnchor: [16, 32], // Anchor point of the icon
+            popupAnchor: [0, -32] // Position of the popup relative to the icon
+        });
+
+        // Function to plot streetlights in a straight line with a specific distance
+        function plotStreetlights(area, label) {
+            var streetlights = [];
+            for (var i = 0; i < 5; i++) {
+                var latOffset = i * 0.0009; // Approx 100 meters in latitude
+                var lng = area.center[1];
+                var lat = area.center[0] + latOffset;
+                var marker = L.marker([lat, lng], {icon: streetlightIcon}).addTo(map);
+                marker.bindPopup(label + " Streetlight " + (i + 1) + 
+                    '<br><a href="https://669f95aa1be443147f632eab--starlit-cheesecake-7b989f.netlify.app/" target="_blank">Queries</a>' + 
+                    '<br><a href="#" onclick="authenticateAndRedirect(event)">Status</a>');
+                marker.on('mouseover', function (e) {
+                    this.setIcon(L.icon({
+                       iconUrl: 'data:image/png;base64,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', // Replace with the URL to your streetlight icon
+                        iconSize: [40, 40], // Increase the size on hover
+                        iconAnchor: [20, 40],
+                        popupAnchor: [0, -40]
+                    }));
+                    this.openPopup();
+                });
+                marker.on('mouseout', function (e) {
+                    this.setIcon(streetlightIcon);
+                });
+                marker.on('click', function (e) {
+                    showToggleBox(marker);
+                });
+                streetlights.push({latLng: marker.getLatLng(), label: label});
+            }
+            return streetlights;
+        }
+
+        // Plot streetlights in each area
+        var streetlights = {
+            A: plotStreetlights(areas.A, "Area A"),
+            B: plotStreetlights(areas.B, "Area B"),
+            C: plotStreetlights(areas.C, "Area C"),
+            D: plotStreetlights(areas.D, "Area D"),
+            E: plotStreetlights(areas.E, "Area E"),
+            F: plotStreetlights(areas.F, "Area F")
+        };
+
+        var allStreetlights = [].concat.apply([], Object.values(streetlights));
+
+        // Function to find the nearest area center
+        function findNearestArea(userLatLng, areas) {
+            var nearestArea = null;
+            var nearestDistance = Infinity;
+
+            areas.forEach(function(area) {
+                var distance = map.distance(userLatLng, area.center);
+                if (distance < nearestDistance) {
+                    nearestDistance = distance;
+                    nearestArea = area;
+                }
+            });
+
+            return nearestArea;
+        }
+
+        // Geolocation to find user's current location
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(function(position) {
+                var userLatLng = [position.coords.latitude, position.coords.longitude];
+                L.marker(userLatLng).addTo(map).bindPopup("Your Location").openPopup();
+
+                // Find the nearest streetlight
+                var nearestStreetlight = L.GeometryUtil.closest(map, allStreetlights.map(s => s.latLng), userLatLng);
+                var distance = map.distance(userLatLng, nearestStreetlight);
+
+                // Find the label of the nearest streetlight
+                var nearestStreetlightLabel = allStreetlights.find(s => s.latLng.equals(nearestStreetlight)).label;
+
+                // Find the nearest area center
+                var nearestArea = findNearestArea(userLatLng, Object.values(areas));
+                var nearestAreaLabel = Object.keys(areas).find(key => areas[key] === nearestArea);
+
+                // Add a popup for the nearest streetlight
+                L.marker(nearestStreetlight, {icon: streetlightIcon}).addTo(map).bindPopup("Nearest Streetlight (" + nearestStreetlightLabel + ")<br>Distance: " + distance.toFixed(2) + " meters").openPopup();
+
+                // Draw a line from the user's location to the nearest streetlight
+                L.polyline([userLatLng, nearestStreetlight], {color: 'yellow', weight: 3}).addTo(map);
+
+                // Zoom to the user's location
+                map.setView(userLatLng, 15);
+
+                // Show a popup message for the nearest area
+                L.popup()
+                    .setLatLng(userLatLng)
+                    .setContent("You are closest to " + nearestAreaLabel)
+                    .openOn(map);
+
+            }, function() {
+                alert("Geolocation is not supported by this browser or permission was denied.");
+            });
+        } else {
+            alert("Geolocation is not supported by this browser.");
+        }
+
+        // Show/hide area circles based on selected group and zoom to the group's area
+        function showAreaGroup(group) {
+            var groupBounds = L.latLngBounds([]);
+            for (var key in areaCircles) {
+                if (areaCircles.hasOwnProperty(key)) {
+                    if (group.includes(key)) {
+                        areaCircles[key].addTo(map);
+                        groupBounds.extend(areaCircles[key].getBounds());
+                    } else {
+                        map.removeLayer(areaCircles[key]);
+                    }
+                }
+            }
+            map.fitBounds(groupBounds);
+        }
+
+        document.getElementById('showFirstGroup').addEventListener('click', function() {
+            showAreaGroup(['A', 'B', 'C']);
+        });
+
+        document.getElementById('showSecondGroup').addEventListener('click', function() {
+            showAreaGroup(['D', 'E', 'F']);
+        });
+
+        function authenticateAndRedirect(event) {
+            event.preventDefault();
+            var username = prompt("Enter username:");
+            var password = prompt("Enter password:");
+            if (username === "admin" && password === "password") { // Replace with your credentials
+                window.open("https://io.adafruit.com/Mickleson/dashboards/status", "_blank");
+            } else {
+                alert("Incorrect username or password.");
+            }
+        }
+
+        function showToggleBox(marker) {
+            var toggleBox = document.getElementById('toggleBox');
+            toggleBox.style.display = 'block';
+            var toggleButton = document.getElementById('toggleButton');
+            toggleButton.innerHTML = 'Unsolved';
+            toggleButton.style.backgroundColor = 'red';
+
+            toggleButton.onclick = function() {
+                if (toggleButton.innerHTML === 'Unsolved') {
+                    toggleButton.innerHTML = 'Solved';
+                    toggleButton.style.backgroundColor = 'green';
+                } else {
+                    toggleButton.innerHTML = 'Unsolved';
+                    toggleButton.style.backgroundColor = 'red';
+                }
+            };
+        }
+    </script>
+</body>
+</html>
